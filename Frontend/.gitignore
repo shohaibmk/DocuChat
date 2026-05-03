@@ -7,10 +7,19 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Folders to ignore
+.sample_designs
 node_modules
 dist
 dist-ssr
 *.local
+
+
+# Environment files to ignore
+.env*
+!example.env
+coverage
+*.tsbuildinfo
 
 # Editor directories and files
 .vscode/*
