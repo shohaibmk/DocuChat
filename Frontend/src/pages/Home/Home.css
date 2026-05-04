@@ -1,0 +1,144 @@
+/* Strike-through bar on hero h1 */
+.h1-strike {
+  position: relative;
+  white-space: nowrap;
+}
+.h1-strike::after {
+  content: "";
+  position: absolute;
+  left: -2%;
+  right: -2%;
+  top: 52%;
+  height: 4px;
+  background: var(--color-magenta);
+  box-shadow: 0 0 14px rgba(255, 46, 136, 0.5);
+  transform: rotate(-2deg);
+}
+
+/* Feature card mouse-tracker glow */
+.feat-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.feat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    400px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(198, 244, 50, 0.08),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.feat-card:hover::before {
+  opacity: 1;
+}
+
+/* Use-case card animated underline */
+.case-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s;
+}
+.case-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-lime);
+  box-shadow: 0 0 10px var(--lime-glow);
+  transition: width 0.4s ease;
+}
+.case-card:hover::after {
+  width: 100%;
+}
+
+/* Pipeline connecting line between steps */
+.pipeline-grid {
+  position: relative;
+}
+.pipeline-grid::before {
+  content: "";
+  position: absolute;
+  top: 38px;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-lime) 15%,
+    var(--color-lime) 85%,
+    transparent
+  );
+  opacity: 0.5;
+}
+@media (max-width: 1080px) {
+  .pipeline-grid::before {
+    display: none;
+  }
+}
+
+/* CTA grid backdrop */
+.cta-card {
+  position: relative;
+  overflow: hidden;
+}
+.cta-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--color-line-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line-soft) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse at 50% 50%, black 30%, transparent 80%);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* File icon dog-ear corner */
+.glyph-file {
+  position: relative;
+}
+.glyph-file::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-style: solid;
+  border-width: 0 0 8px 8px;
+  border-color: transparent transparent var(--color-bg-elev) transparent;
+}
+
+/* Diff list markers */
+.diff-marker::before {
+  content: "—";
+  color: var(--color-fg-dim);
+  margin-right: 10px;
+}
+.diff-marker-arrow::before {
+  content: "→";
+  color: var(--color-lime);
+  margin-right: 10px;
+}
+
+/* Citation highlight */
+.cite-hl {
+  background: linear-gradient(180deg, transparent 60%, rgba(198, 244, 50, 0.1) 60%);
+  color: var(--color-fg);
+  padding: 0 2px;
+}
+
+/* Mock chat dashed citation */
+.mock-cite-link {
+  color: var(--color-lime);
+  border-bottom: 1px dashed var(--color-lime);
+  padding: 0 1px;
+}
