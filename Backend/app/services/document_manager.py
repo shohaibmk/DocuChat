@@ -5,8 +5,8 @@ from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from typing import Any
 
-import boto3
-from botocore.client import Config
+import boto3  # type: ignore
+from botocore.client import Config  # type: ignore
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.constants.uploads import ALLOWED_CONTENT_TYPES
 from app.core.logging import get_logger
@@ -64,11 +64,11 @@ class DocumentManager:
             ExpiresIn=settings.S3_PRESIGN_EXPIRES,
         )
         # Use region-specific endpoint to avoid TemporaryRedirect
-        presigned["url"] = f"https://{settings.S3_BUCKET_NAME}.s3.{settings.AWS_REGION}.amazonaws.com/"
-
-        expires_at = datetime.now(timezone.utc) + timedelta(
-            seconds=settings.DOCUMENT_EXPIRY
+        presigned["url"] = (
+            f"https://{settings.S3_BUCKET_NAME}.s3.{settings.AWS_REGION}.amazonaws.com/"
         )
+
+        expires_at = datetime.now(timezone.utc) + timedelta(seconds=settings.DOCUMENT_EXPIRY)
         from app.models.document import DocumentStatus
 
         document = Document(

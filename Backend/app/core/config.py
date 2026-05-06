@@ -1,5 +1,5 @@
 import os
-from typing import Annotated
+from typing import Annotated, Any
 from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
@@ -58,21 +58,21 @@ class Settings(BaseSettings):
 
     @field_validator("LOG_LEVEL", mode="before")
     @classmethod
-    def _validate_log_level(cls, v):
+    def _validate_log_level(cls, v: Any) -> Any:
         if v and v.upper() == "DEBUG":
             logger.warning(f"LOG_LEVEL is set to {v}")
         return v
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
-    def _split_cors_origins(cls, v):
+    def _split_cors_origins(cls, v: Any) -> Any:
         if isinstance(v, str):
             return [s.strip() for s in v.split(",") if s.strip()]
         return v
 
     @model_validator(mode="after")
-    def _assemble_database_url(self):
-        if all([self.DB_USER, self.DB_PASSWORD, self.DB_HOST, self.DB_PORT, self.DB_NAME]):
+    def _assemble_database_url(self) -> "Settings":
+        if self.DB_USER and self.DB_PASSWORD and self.DB_HOST and self.DB_PORT and self.DB_NAME:
             self.DATABASE_URL = (
                 f"postgresql+asyncpg://{quote_plus(self.DB_USER)}:{quote_plus(self.DB_PASSWORD)}"
                 f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}?ssl=require"
@@ -83,7 +83,7 @@ class Settings(BaseSettings):
         return self
 
     @model_validator(mode="after")
-    def _validate_s3_config(self):
+    def _validate_s3_config(self) -> "Settings":
         if not self.S3_BUCKET_NAME:
             logger.error("S3_BUCKET_NAME is not set")
         if not self.AWS_ACCESS_KEY_ID:
@@ -93,5 +93,6 @@ class Settings(BaseSettings):
         if not self.AWS_REGION:
             logger.error("AWS_REGION is not set")
         return self
+
 
 settings = Settings()

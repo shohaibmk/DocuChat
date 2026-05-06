@@ -1,4 +1,3 @@
-
 ALLOWED_EXTENSIONS = {".pdf", ".txt", ".doc", ".docx", ".epub"}
 ALLOWED_CONTENT_TYPES = {
     "application/pdf",

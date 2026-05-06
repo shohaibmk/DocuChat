@@ -15,11 +15,11 @@ RESET = "\x1b[0m"
 CYAN = "\x1b[36m"
 WHITE = "\x1b[37m"
 LEVEL_COLORS = {
-    logging.DEBUG: "\x1b[34m",      # blue
-    logging.INFO: "\x1b[32m",       # green
-    logging.WARNING: "\x1b[33m",    # yellow
-    logging.ERROR: "\x1b[31m",      # red
-    logging.CRITICAL: "\x1b[1;31m", # bold red
+    logging.DEBUG: "\x1b[34m",  # blue
+    logging.INFO: "\x1b[32m",  # green
+    logging.WARNING: "\x1b[33m",  # yellow
+    logging.ERROR: "\x1b[31m",  # red
+    logging.CRITICAL: "\x1b[1;31m",  # bold red
 }
 
 

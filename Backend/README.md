@@ -48,6 +48,7 @@ cp .env.example .env
 ```
 
 Then open `.env` and update at minimum:
+
 - `SECRET_KEY` — generate with `python -c "import secrets; print(secrets.token_urlsafe(32))"`
 - `DATABASE_URL` — defaults to local SQLite; change for Postgres etc.
 - `CORS_ORIGINS` — frontend origin(s)
@@ -59,6 +60,7 @@ uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Once running:
+
 - API root: <http://localhost:8000>
 - Swagger docs: <http://localhost:8000/docs>
 - ReDoc: <http://localhost:8000/redoc>
@@ -89,15 +91,15 @@ uv lock --upgrade            # Refresh lockfile
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|---|---|---|
-| `PROJECT_NAME` | `DocuChat` | App display name |
-| `DEBUG` | `false` | Enable SQLAlchemy echo + debug behavior |
-| `API_V1_PREFIX` | `/api/v1` | Base path for v1 routes |
-| `CORS_ORIGINS` | `["http://localhost:3000"]` | Allowed frontend origins (JSON array) |
-| `DATABASE_URL` | `sqlite+aiosqlite:///./docuchat.db` | Async SQLAlchemy URL |
-| `SECRET_KEY` | _change me_ | JWT/session signing secret |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | `1440` | Token lifetime |
+| Variable                      | Default                             | Description                             |
+| ----------------------------- | ----------------------------------- | --------------------------------------- |
+| `PROJECT_NAME`                | `DocuChat`                          | App display name                        |
+| `DEBUG`                       | `false`                             | Enable SQLAlchemy echo + debug behavior |
+| `API_V1_PREFIX`               | `/api/v1`                           | Base path for v1 routes                 |
+| `CORS_ORIGINS`                | `["http://localhost:3000"]`         | Allowed frontend origins (JSON array)   |
+| `DATABASE_URL`                | `sqlite+aiosqlite:///./docuchat.db` | Async SQLAlchemy URL                    |
+| `SECRET_KEY`                  | _change me_                         | JWT/session signing secret              |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `1440`                              | Token lifetime                          |
 
 ## Troubleshooting
 

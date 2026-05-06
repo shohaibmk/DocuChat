@@ -7,7 +7,7 @@ router = APIRouter(tags=["chats"])
 async def chats() -> str:
     """
     Chat endpoint.
-    
+
     Returns:
         str: A string containing the response to the chat.
     """

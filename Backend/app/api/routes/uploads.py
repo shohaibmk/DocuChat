@@ -62,9 +62,7 @@ async def _read_and_size(file: UploadFile, index: int) -> int:
                     detail={
                         "index": index,
                         "filename": file.filename,
-                        "reason": (
-                            f"File exceeds max size of {MAX_FILE_SIZE_BYTES} bytes."
-                        ),
+                        "reason": (f"File exceeds max size of {MAX_FILE_SIZE_BYTES} bytes."),
                     },
                 )
     except HTTPException:
@@ -98,8 +96,7 @@ class PresignedUrlRequest(BaseModel):
         ext = Path(v).suffix.lower()
         if ext not in ALLOWED_EXTENSIONS:
             raise ValueError(
-                f"Unsupported extension {ext!r}. "
-                f"Allowed: {', '.join(sorted(ALLOWED_EXTENSIONS))}."
+                f"Unsupported extension {ext!r}. Allowed: {', '.join(sorted(ALLOWED_EXTENSIONS))}."
             )
         return v
 
@@ -146,13 +143,13 @@ async def upload_files(
 ) -> UploadResponse:
     """
     Upload multiple files with validation.
-    
+
     Args:
         files: List of uploaded files
-        
+
     Returns:
         UploadResponse with count and list of uploaded files
-        
+
     Raises:
         HTTPException: If validation fails
     """
@@ -189,9 +186,7 @@ async def upload_files(
     for i, f in enumerate(files):
         size = await _read_and_size(f, i)
         if size == 0:
-            raise _bad_request(
-                {"index": i, "filename": f.filename, "reason": "File is empty."}
-            )
+            raise _bad_request({"index": i, "filename": f.filename, "reason": "File is empty."})
         accepted.append(
             UploadedFile(filename=f.filename or "", content_type=f.content_type, size=size)
         )
