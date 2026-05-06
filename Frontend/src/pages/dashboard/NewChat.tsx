@@ -29,18 +29,18 @@ export default function NewChat({ onStart }: NewChatProps) {
         aria-hidden
         className="pointer-events-none absolute top-10 right-10 hidden h-32 w-32 lg:block"
       >
-        <div className="border-line-bright h-full w-full animate-spin-slow rounded-full border opacity-40" />
+        <div className="border-line-bright animate-spin-slow h-full w-full rounded-full border opacity-40" />
         <div className="border-lime/30 absolute inset-3 rounded-full border opacity-50" />
-        <div className="bg-lime absolute top-1/2 left-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-glow" />
+        <div className="bg-lime shadow-glow absolute top-1/2 left-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full" />
       </div>
 
       {/* Header — thread breadcrumb, awaiting-prompt status, source-scope picker, discard button. */}
       <header className="border-line bg-bg-panel/60 relative z-10 flex items-center justify-between border-b px-8 py-5 backdrop-blur-md">
         <div className="flex items-baseline gap-3">
-          <span className="text-fg-mute font-mono text-[10px] tracking-mono uppercase">
+          <span className="text-fg-mute tracking-mono font-mono text-[10px] uppercase">
             Thread / new
           </span>
-          <span className="bg-lime inline-block h-1.5 w-1.5 animate-pulse-soft rounded-full shadow-glow-sm" />
+          <span className="bg-lime animate-pulse-soft shadow-glow-sm inline-block h-1.5 w-1.5 rounded-full" />
           <span className="text-fg-soft font-mono text-[10px] tracking-[0.18em] uppercase">
             Awaiting first prompt
           </span>
@@ -63,7 +63,7 @@ export default function NewChat({ onStart }: NewChatProps) {
       <section className="relative z-10 flex flex-1 items-center overflow-y-auto px-8 py-12">
         <div className="mx-auto w-full max-w-[820px]">
           {/* Eyebrow — date stamp + "New conversation" label. */}
-          <div className="text-fg-mute mb-5 flex animate-slide-up items-center gap-3 font-mono text-[10px] tracking-mono uppercase [animation-delay:50ms]">
+          <div className="text-fg-mute animate-slide-up tracking-mono mb-5 flex items-center gap-3 font-mono text-[10px] uppercase [animation-delay:50ms]">
             <span className="bg-line-bright h-px w-8" />
             New conversation
             <span className="text-fg-dim">·</span>
@@ -76,22 +76,22 @@ export default function NewChat({ onStart }: NewChatProps) {
             <br />
             <span className="relative inline-block">
               read
-              <span className="bg-lime/70 absolute -bottom-1 left-0 h-[6px] w-full -skew-x-6 rounded-sm shadow-glow" />
+              <span className="bg-lime/70 shadow-glow absolute -bottom-1 left-0 h-[6px] w-full -skew-x-6 rounded-sm" />
             </span>{" "}
             <span className="text-fg-soft">today?</span>
           </h1>
 
           {/* Subtitle — explains the RAG flow in one sentence. */}
-          <p className="text-fg-soft mt-4 max-w-[560px] animate-slide-up text-[15px] leading-relaxed [animation-delay:200ms]">
+          <p className="text-fg-soft animate-slide-up mt-4 max-w-[560px] text-[15px] leading-relaxed [animation-delay:200ms]">
             Drop a question, paste a clause, or pick from below. DocuChat will retrieve the relevant
             passages from your library and cite every line.
           </p>
 
           {/* Upload zone — drag/drop or click to ingest; new docs feed the same RAG store. */}
-          <div className="mt-8 animate-slide-up [animation-delay:250ms]">
+          <div className="animate-slide-up mt-8 [animation-delay:250ms]">
             {/* Eyebrow — matches dashboard section labels (Geist Mono, uppercase, wide tracking). */}
-            <div className="text-fg-mute mb-2 flex items-center gap-2 font-mono text-[9px] tracking-mono uppercase">
-              <span className="bg-lime h-1.5 w-1.5 rounded-full shadow-glow-sm" />
+            <div className="text-fg-mute tracking-mono mb-2 flex items-center gap-2 font-mono text-[9px] uppercase">
+              <span className="bg-lime shadow-glow-sm h-1.5 w-1.5 rounded-full" />
               Ingest
               <span className="bg-line-bright ml-2 h-px flex-1" />
               <span className="text-fg-dim">drag · drop · pick</span>
@@ -104,7 +104,7 @@ export default function NewChat({ onStart }: NewChatProps) {
           {/* Composer form — submits via onStart; Enter sends, Shift+Enter inserts newline.
               Composer stays disabled until at least one document has finished uploading. */}
           <form
-            className="mt-10 animate-slide-up [animation-delay:300ms]"
+            className="animate-slide-up mt-10 [animation-delay:300ms]"
             onSubmit={(e) => {
               e.preventDefault();
               const data = new FormData(e.currentTarget);
@@ -116,8 +116,8 @@ export default function NewChat({ onStart }: NewChatProps) {
               disabled={attachedFilesList.length === 0}
               className="contents disabled:[&_*]:cursor-not-allowed"
             >
-              <div className="text-fg-mute mb-2 flex items-center gap-2 font-mono text-[9px] tracking-mono uppercase">
-                <span className="bg-lime h-1.5 w-1.5 rounded-full shadow-glow-sm" />
+              <div className="text-fg-mute tracking-mono mb-2 flex items-center gap-2 font-mono text-[9px] uppercase">
+                <span className="bg-lime shadow-glow-sm h-1.5 w-1.5 rounded-full" />
                 Compose
                 <span className="bg-line-bright ml-2 h-px flex-1" />
                 <span className="text-fg-dim">⏎ to send · ⇧⏎ newline</span>
@@ -150,12 +150,10 @@ export default function NewChat({ onStart }: NewChatProps) {
                   </div>
                   <button
                     type="submit"
-                    className="bg-lime text-bg hover:bg-lime-bright disabled:bg-bg-card disabled:text-fg-mute inline-flex items-center gap-2 rounded-md px-4 py-2 text-[13px] font-semibold shadow-glow-lg transition-transform hover:-translate-y-px disabled:shadow-none disabled:hover:translate-y-0"
+                    className="bg-lime text-bg hover:bg-lime-bright disabled:bg-bg-card disabled:text-fg-mute shadow-glow-lg inline-flex items-center gap-2 rounded-md px-4 py-2 text-[13px] font-semibold transition-transform hover:-translate-y-px disabled:shadow-none disabled:hover:translate-y-0"
                   >
                     Begin
-                    <span className="font-mono text-[10px] tracking-[0.16em] opacity-70">
-                      ⏎
-                    </span>
+                    <span className="font-mono text-[10px] tracking-[0.16em] opacity-70">⏎</span>
                   </button>
                 </div>
               </div>

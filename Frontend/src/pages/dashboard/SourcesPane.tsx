@@ -98,12 +98,10 @@ export default function SourcesPane({ collapsed, onToggle }: SourcesPaneProps) {
       {/* Header — "Sources" title, cited count, collapse chevron. */}
       <header className="border-line flex items-center justify-between border-b px-5 pt-5 pb-4">
         <div className="leading-tight">
-          <div className="text-fg-mute font-mono text-[9px] tracking-mono uppercase">
+          <div className="text-fg-mute tracking-mono font-mono text-[9px] uppercase">
             Citations · TODO
           </div>
-          <h2 className="font-serif text-[20px] tracking-tight italic">
-            Sources
-          </h2>
+          <h2 className="font-serif text-[20px] tracking-tight italic">Sources</h2>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="border-line-bright bg-bg-elev text-fg-soft inline-flex h-6 items-center rounded-full border px-2 font-mono text-[9px] tracking-[0.16em] uppercase">
@@ -142,7 +140,7 @@ export default function SourcesPane({ collapsed, onToggle }: SourcesPaneProps) {
       {/* Citation list — one card per retrieved chunk: id/page, score bar, blockquote, open-in-viewer link. */}
       <section className="flex-1 overflow-y-auto px-3 py-3">
         <div className="flex items-center justify-between px-2 pb-2">
-          <h3 className="text-fg-mute font-mono text-[9px] tracking-mono uppercase">
+          <h3 className="text-fg-mute tracking-mono font-mono text-[9px] uppercase">
             Cited in answer
           </h3>
           <button className="text-fg-soft hover:text-lime font-mono text-[9px] tracking-[0.16em] uppercase transition-colors">
@@ -173,15 +171,13 @@ export default function SourcesPane({ collapsed, onToggle }: SourcesPaneProps) {
                   <div className="text-fg-mute font-mono text-[9px] tracking-[0.14em] uppercase">
                     Score
                   </div>
-                  <div className="text-lime font-mono text-[12px]">
-                    {scoreBar(s.score)}
-                  </div>
+                  <div className="text-lime font-mono text-[12px]">{scoreBar(s.score)}</div>
                 </div>
               </div>
 
               <div className="bg-bg-input mt-2 h-[2px] w-full overflow-hidden rounded-full">
                 <div
-                  className="bg-lime h-full shadow-glow-sm"
+                  className="bg-lime shadow-glow-sm h-full"
                   style={{ width: scoreBar(s.score) }}
                 />
               </div>
