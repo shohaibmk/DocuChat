@@ -3,6 +3,7 @@ import type { ChangeEvent, DragEvent, KeyboardEvent, MouseEvent } from "react";
 import axios from "axios";
 import { uploadDocument } from "../lib/axios";
 import { DEFAULT_ACCEPT, DEFAULT_HINT, DEFAULT_LABEL } from "../constants/upload";
+import { Trash2 } from "lucide-react";
 
 type UploadStatus = "uploading" | "done" | "error" | "canceled";
 
@@ -34,19 +35,6 @@ const formatSize = (bytes: number): string => {
 };
 
 const fileKey = (f: File): string => `${f.name}:${f.size}:${f.lastModified}`;
-
-const statusLabel = (e: UploadEntry): string => {
-  switch (e.status) {
-    case "uploading":
-      return `Uploading ${e.progress}%`;
-    case "done":
-      return "Uploaded";
-    case "canceled":
-      return "Canceled";
-    case "error":
-      return e.error ?? "Failed";
-  }
-};
 
 export default function UploadZone({
   accept = DEFAULT_ACCEPT,
@@ -195,42 +183,32 @@ export default function UploadZone({
     });
   };
 
+  // Drop zone — dashed lime-on-dark surface; hover trails a soft lime radial under the cursor.
   const zoneClasses = cn(
-    "group relative mt-auto cursor-pointer overflow-hidden rounded-lg p-[18px] text-center",
-    "border border-dashed bg-[var(--bg-elev)] border-[var(--line-bright)]",
+    "group relative cursor-pointer overflow-hidden rounded-xl p-5 text-center",
+    "border border-dashed bg-bg-elev border-line-bright",
     "transition-[border-color,background,box-shadow,transform] duration-[250ms]",
-    "focus-visible:border-[var(--lime)] focus-visible:shadow-[0_0_0_2px_var(--lime-soft)] focus-visible:outline-none",
+    "focus-visible:border-lime focus-visible:shadow-[0_0_0_2px_rgba(198,244,50,0.18)] focus-visible:outline-none",
     "before:pointer-events-none before:absolute before:inset-0 before:opacity-0",
-    "before:bg-[radial-gradient(120px_80px_at_var(--ux,50%)_var(--uy,50%),var(--lime-soft),transparent_70%)]",
+    "before:bg-[radial-gradient(circle_120px_at_var(--ux,50%)_var(--uy,50%),rgba(198,244,50,0.22),transparent_70%)]",
     "before:transition-opacity before:duration-[250ms]",
     drag
-      ? "-translate-y-px border-solid border-[var(--lime)] bg-[var(--lime-soft)] shadow-[0_0_0_2px_var(--lime-soft),0_0_28px_var(--lime-glow)]"
-      : "hover:border-[var(--lime)] hover:bg-[var(--lime-soft)] hover:before:opacity-100",
+      ? "-translate-y-px border-solid border-lime bg-lime/10 shadow-[0_0_0_2px_rgba(198,244,50,0.2),0_0_32px_var(--lime-glow)]"
+      : "hover:border-lime hover:bg-lime/[0.04] hover:before:opacity-100",
   );
 
+  // Plus glyph — flips on drag-active for a tactile cue.
   const iconClasses = cn(
-    "mx-auto mb-2.5 flex h-8 w-8 items-center justify-center rounded-full",
-    "bg-[var(--lime)] text-[18px] font-medium text-[var(--bg)]",
-    "shadow-[0_0_20px_var(--lime-glow)]",
+    "mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full",
+    "bg-lime text-[18px] font-semibold text-bg",
+    "shadow-glow-lg",
     "transition-transform duration-[350ms] ease-[cubic-bezier(0.2,0.8,0.2,1)]",
     drag && "rotate-180 scale-105",
   );
 
-  const statusColor = (s: UploadStatus): string => {
-    if (s === "done") return "text-[var(--lime)]";
-    if (s === "error") return "text-[#ff6b6b]";
-    if (s === "canceled") return "text-[var(--text-mute)]";
-    return "text-[var(--text-soft)]";
-  };
-
-  const barColor = (s: UploadStatus): string => {
-    if (s === "error") return "bg-[#ff6b6b]";
-    if (s === "canceled") return "bg-[var(--text-mute)]";
-    return "bg-[var(--lime)]";
-  };
-
   return (
-    <div>
+    <div className="w-full">
+      {/* Drop zone — click/keyboard/drag entry point; opens the native file picker. */}
       <div
         className={zoneClasses}
         role="button"
@@ -245,12 +223,10 @@ export default function UploadZone({
         onDrop={onDrop}
       >
         <div className={iconClasses}>+</div>
-        <div className="mb-1 text-[12px] font-medium text-[var(--text)]">
+        <div className="text-fg mb-1 font-serif text-[18px] tracking-tight italic">
           {drag ? "Drop to ingest" : label}
         </div>
-        <div className="font-['Geist_Mono',monospace] text-[9px] tracking-[0.1em] text-[var(--text-mute)] uppercase">
-          {hint}
-        </div>
+        <div className="text-fg-mute font-mono text-[9px] tracking-[0.18em] uppercase">{hint}</div>
         <input
           ref={inputRef}
           type="file"
@@ -261,48 +237,42 @@ export default function UploadZone({
         />
       </div>
 
+      {/* Upload list — one row per file: name, size, cancel/remove, progress bar, status. */}
       {entries.length > 0 && (
-        <ul className="mt-2.5 flex list-none flex-col gap-1 p-0">
+        <ul className="mt-3 flex list-none flex-col gap-1.5 p-0">
           {entries.map((e) => (
             <li
               key={e.key}
-              className="rounded-md border border-[var(--line)] bg-[var(--bg-card)] px-2 py-1.5 font-['Geist_Mono',monospace] text-[10px] text-[var(--text-soft)]"
+              className="border-line bg-bg-card text-fg-soft rounded-md border px-2.5 py-2 font-mono text-[12px]"
             >
-              <div className="flex items-center justify-between gap-2">
-                <span
-                  className="overflow-hidden text-ellipsis whitespace-nowrap"
-                  title={e.file.name}
-                >
+              <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-4">
+                <span className="truncate" title={e.file.name}>
                   {e.file.name}
                 </span>
-                <span className="flex-shrink-0 text-[var(--text-mute)]">
-                  {formatSize(e.file.size)}
-                </span>
+                <span className="text-fg-mute">{formatSize(e.file.size)}</span>
                 <button
                   type="button"
                   aria-label={`Remove ${e.file.name}`}
                   onClick={(ev) => removeEntry(ev, e.key)}
-                  className="inline-flex h-4 w-4 flex-shrink-0 cursor-pointer items-center justify-center rounded border border-[var(--line-bright)] bg-transparent text-[12px] leading-none text-[var(--text-mute)] transition-colors hover:border-[var(--lime)] hover:bg-[var(--lime-soft)] hover:text-[var(--lime)]"
+                  className="border-line-bright text-fg-mute hover:bg-lime/10 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded border bg-transparent text-[12px] leading-none transition-colors hover:border-red-500 hover:text-red-500"
                 >
-                  ×
+                  <Trash2 size={16} />
                 </button>
               </div>
-              <div className="mt-1 flex items-center gap-2">
-                <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-[var(--bg-input)]">
+              {/* <div className="mt-1.5 flex items-center gap-2">
+                <div className="bg-bg-input h-[3px] flex-1 overflow-hidden rounded-full">
                   <div
                     className={cn(
-                      "h-full transition-[width] duration-[200ms] ease-out",
+                      "h-full transition-[width] duration-200 ease-out",
                       barColor(e.status),
                     )}
                     style={{ width: `${e.status === "done" ? 100 : e.progress}%` }}
                   />
                 </div>
-                <span
-                  className={cn("flex-shrink-0 tracking-[0.1em] uppercase", statusColor(e.status))}
-                >
+                <span className={cn("shrink-0 tracking-[0.16em] uppercase", statusColor(e.status))}>
                   {statusLabel(e)}
                 </span>
-              </div>
+              </div> */}
             </li>
           ))}
         </ul>

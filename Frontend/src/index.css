@@ -28,7 +28,15 @@
   --font-serif: "Instrument Serif", serif;
 
   --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
-  --animate-slide-up: slide-up 0.5s ease-out backwards;
+  --animate-slide-up: slide-up 0.55s ease-out backwards;
+  --animate-spin-slow: spin 60s linear infinite;
+
+  --shadow-glow-sm: 0 0 8px var(--lime-glow);
+  --shadow-glow: 0 0 18px var(--lime-glow);
+  --shadow-glow-lg: 0 0 24px var(--lime-glow);
+  --shadow-glow-xl: 0 0 32px var(--lime-glow);
+
+  --tracking-mono: 0.22em;
 }
 
 :root {
