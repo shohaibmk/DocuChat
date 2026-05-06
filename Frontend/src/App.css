@@ -34,7 +34,10 @@ html,
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: "Geist", -apple-system, sans-serif;
+  font-family:
+    "Geist",
+    -apple-system,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
 }
@@ -52,11 +55,7 @@ body::before {
     linear-gradient(var(--line-soft) 1px, transparent 1px),
     linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
   background-size: 56px 56px;
-  mask-image: radial-gradient(
-    ellipse at 50% 30%,
-    black 30%,
-    transparent 80%
-  );
+  mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 80%);
   pointer-events: none;
   z-index: 0;
   opacity: 0.55;
@@ -913,13 +912,7 @@ body::after {
   left: 12%;
   right: 12%;
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--lime) 15%,
-    var(--lime) 85%,
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, var(--lime) 15%, var(--lime) 85%, transparent);
   opacity: 0.5;
 }
 
@@ -1073,8 +1066,7 @@ body::after {
 }
 
 .diff-side.right {
-  background: linear-gradient(180deg, rgba(198, 244, 50, 0.04), transparent),
-    var(--bg-panel);
+  background: linear-gradient(180deg, rgba(198, 244, 50, 0.04), transparent), var(--bg-panel);
 }
 
 .diff-tag {

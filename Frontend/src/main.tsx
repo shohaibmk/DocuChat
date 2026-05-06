@@ -4,12 +4,14 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import App from "./App.tsx";
 import "./index.css";
+import UploadZone from "./components/UploadZone.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
+        <Route path="/upload" element={<UploadZone />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
