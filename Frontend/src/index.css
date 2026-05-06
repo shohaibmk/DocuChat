@@ -1,1 +1,97 @@
 @import "tailwindcss";
+
+@theme {
+  --color-bg: #0c0d0a;
+  --color-bg-elev: #151712;
+  --color-bg-panel: #111210;
+  --color-bg-card: #1a1c17;
+  --color-bg-input: #1f2119;
+
+  --color-fg: #eef0e6;
+  --color-fg-soft: #b5b8a8;
+  --color-fg-mute: #6e7264;
+  --color-fg-dim: #4a4d42;
+
+  --color-line: #24261f;
+  --color-line-soft: #1a1c17;
+  --color-line-bright: #32352b;
+
+  --color-lime: #c6f432;
+  --color-lime-bright: #d8ff4a;
+  --color-magenta: #ff2e88;
+  --color-amber: #ffaa00;
+  --color-cyan: #00e5ff;
+  --color-orange: #ff6b1a;
+
+  --font-sans: "Geist", -apple-system, sans-serif;
+  --font-mono: "Geist Mono", monospace;
+  --font-serif: "Instrument Serif", serif;
+
+  --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
+  --animate-slide-up: slide-up 0.5s ease-out backwards;
+}
+
+:root {
+  --lime-glow: rgba(198, 244, 50, 0.45);
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+body {
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--color-line-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line-soft) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse at 50% 30%, black 30%, transparent 80%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(700px circle at 12% 18%, rgba(198, 244, 50, 0.08), transparent 55%),
+    radial-gradient(800px circle at 88% 72%, rgba(255, 46, 136, 0.06), transparent 55%),
+    radial-gradient(500px circle at 50% 110%, rgba(0, 229, 255, 0.04), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
