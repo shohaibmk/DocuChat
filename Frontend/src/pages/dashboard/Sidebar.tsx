@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { useUIStore } from "../../store/uiStore";
 
 type ChatStub = {
   id: string;
@@ -54,6 +55,12 @@ const SHORTCUTS: Array<{ label: string; combo: string; node?: ReactNode }> = [
 ];
 
 export default function Sidebar() {
+  const { setCurrentSessionId } = useUIStore();
+
+  useEffect(() => {
+    setCurrentSessionId(null);
+  }, []);
+
   return (
     <aside className="border-line bg-bg-panel/80 flex h-full w-[320px] shrink-0 flex-col border-r backdrop-blur-xl">
       {/* Brand header — logo mark, workspace label, and the new-chat trigger. */}

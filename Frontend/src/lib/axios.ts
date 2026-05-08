@@ -1,6 +1,6 @@
 import axios from "axios";
-import type { AxiosProgressEvent, AxiosRequestConfig, AxiosResponse } from "axios";
-import { UPLOAD_ENDPOINT, UPLOAD_FIELD_NAME } from "../constants/upload";
+import type { AxiosResponse } from "axios";
+import { UPLOAD_REQUEST_URL_ENDPOINT } from "../constants/upload";
 
 const host = import.meta.env.VITE_API_HOST;
 const port = import.meta.env.VITE_API_PORT;
@@ -19,25 +19,34 @@ export const axiosInstance = axios.create({
   timeout: 60_000,
 });
 
-export type UploadProgress = { loaded: number; total: number | undefined };
-
-export type UploadOptions = {
-  signal?: AbortSignal;
-  onProgress?: (p: UploadProgress) => void;
+export type PresignedUrlRequest = {
+  sessionId: string;
+  filename: string;
+  contentType: string;
 };
 
-export function uploadDocument<T = unknown>(
-  file: File,
-  opts: UploadOptions = {},
-): Promise<AxiosResponse<T>> {
-  const form = new FormData();
-  form.append(UPLOAD_FIELD_NAME, file, file.name);
+export type PresignedPost = {
+  url: string;
+  fields: Record<string, string>;
+};
 
-  const config: AxiosRequestConfig = {
-    signal: opts.signal,
-    onUploadProgress: (e: AxiosProgressEvent) =>
-      opts.onProgress?.({ loaded: e.loaded, total: e.total }),
-  };
+export type PresignedUrlResponse = {
+  data: PresignedPost;
+  message: string;
+  status: string;
+};
 
-  return axiosInstance.post<T>(UPLOAD_ENDPOINT, form, config);
+export function requestUploadUrl(
+  params: PresignedUrlRequest,
+  opts: { signal?: AbortSignal } = {},
+): Promise<AxiosResponse<PresignedUrlResponse>> {
+  return axiosInstance.post<PresignedUrlResponse>(
+    UPLOAD_REQUEST_URL_ENDPOINT,
+    {
+      session_id: params.sessionId,
+      filename: params.filename,
+      content_type: params.contentType,
+    },
+    { signal: opts.signal },
+  );
 }

@@ -16,7 +16,7 @@ export default function Dashboard() {
       <Sidebar />
 
       {/* Center — empty state until the user starts a thread, then the live chat pane. */}
-      {activeChatId ? <ChatPane /> : <NewChat onStart={() => setActiveChatId("draft")} />}
+      {activeChatId ? <ChatPane /> : <NewChat onStart={() => setActiveChatId(null)} />}
 
       {/* Right rail — citation/source inspector, collapsible to a 48px strip. */}
       <SourcesPane collapsed={sourcesCollapsed} onToggle={() => setSourcesCollapsed((v) => !v)} />

@@ -1,17 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChangeEvent, DragEvent, KeyboardEvent, MouseEvent } from "react";
 import axios from "axios";
-import { uploadDocument } from "../lib/axios";
-import { DEFAULT_ACCEPT, DEFAULT_HINT, DEFAULT_LABEL } from "../constants/upload";
-import { Trash2 } from "lucide-react";
+import { requestUploadUrl } from "../lib/axios";
+import type { PresignedUrlResponse } from "../lib/axios";
+import {
+  DEFAULT_ACCEPT,
+  DEFAULT_HINT,
+  DEFAULT_LABEL,
+  EXTENSION_CONTENT_TYPE,
+} from "../constants/upload";
+import { chatService } from "../services/chatService";
+import { useUIStore } from "../store/uiStore";
+import { Trash2, Loader } from "lucide-react";
 
-type UploadStatus = "uploading" | "done" | "error" | "canceled";
+type UploadStatus = "requesting" | "ready" | "uploaded" | "error" | "canceled";
 
 type UploadEntry = {
   key: string;
   file: File;
   status: UploadStatus;
-  progress: number;
+  presignedUrl?: string;
   error?: string;
   controller: AbortController;
 };
@@ -21,8 +29,15 @@ type UploadZoneProps = {
   multiple?: boolean;
   label?: string;
   hint?: string;
-  onUploaded?: (file: File, data: unknown) => void;
+  onUploaded?: (file: File, data: PresignedUrlResponse) => void;
   onError?: (file: File, error: unknown) => void;
+};
+
+const resolveContentType = (file: File): string => {
+  if (file.type) return file.type;
+  const dot = file.name.lastIndexOf(".");
+  if (dot < 0) return "";
+  return EXTENSION_CONTENT_TYPE[file.name.slice(dot).toLowerCase()] ?? "";
 };
 
 const cn = (...parts: Array<string | false | null | undefined>) => parts.filter(Boolean).join(" ");
@@ -49,15 +64,36 @@ export default function UploadZone({
   const [drag, setDrag] = useState(false);
   const [entries, setEntries] = useState<UploadEntry[]>([]);
   const entriesRef = useRef<UploadEntry[]>([]);
+  const currentSessionId = useUIStore((s) => s.currentSessionId);
+  const setCurrentSessionId = useUIStore((s) => s.setCurrentSessionId);
+  const sessionRequestRef = useRef<Promise<string> | null>(null);
+
+  const ensureSessionId = useCallback(async (): Promise<string> => {
+    if (currentSessionId) return currentSessionId;
+    if (sessionRequestRef.current) return sessionRequestRef.current;
+    const req = chatService
+      .getNewSession()
+      .then((res) => {
+        const id = res.data.data.session_id;
+        setCurrentSessionId(id);
+        return id;
+      })
+      .finally(() => {
+        sessionRequestRef.current = null;
+      });
+    sessionRequestRef.current = req;
+    return req;
+  }, [currentSessionId, setCurrentSessionId]);
 
   useEffect(() => {
     entriesRef.current = entries;
+    console.debug(entries);
   }, [entries]);
 
   useEffect(() => {
     return () => {
       for (const e of entriesRef.current) {
-        if (e.status === "uploading") e.controller.abort();
+        if (e.status === "requesting" || e.status === "ready") e.controller.abort();
       }
     };
   }, []);
@@ -67,16 +103,28 @@ export default function UploadZone({
   }, []);
 
   const startUpload = useCallback(
-    async (entry: UploadEntry) => {
+    async (entry: UploadEntry, sessionId: string) => {
       try {
-        const res = await uploadDocument(entry.file, {
-          signal: entry.controller.signal,
-          onProgress: ({ loaded, total }) => {
-            const pct = total ? Math.round((loaded / total) * 100) : 0;
-            updateEntry(entry.key, { progress: pct });
+        const contentType = resolveContentType(entry.file);
+        const res = await requestUploadUrl(
+          {
+            sessionId,
+            filename: entry.file.name,
+            contentType,
           },
+          { signal: entry.controller.signal },
+        );
+        const { url, fields } = res.data.data;
+        updateEntry(entry.key, {
+          status: "ready",
+          presignedUrl: url,
         });
-        updateEntry(entry.key, { status: "done", progress: 100 });
+        const form = new FormData();
+        for (const [k, v] of Object.entries(fields)) form.append(k, v);
+        form.append("file", entry.file);
+        const uploadResponse = await axios.post(url, form, { signal: entry.controller.signal });
+        console.debug(`${entry.key} was uploaded: `, uploadResponse);
+        updateEntry(entry.key, { status: "uploaded" });
         onUploaded?.(entry.file, res.data);
       } catch (err) {
         if (axios.isCancel(err)) {
@@ -85,7 +133,7 @@ export default function UploadZone({
         }
         const message = axios.isAxiosError(err)
           ? (err.response?.statusText ?? err.message)
-          : "Upload failed";
+          : "Failed to request upload URL";
         updateEntry(entry.key, { status: "error", error: message });
         onError?.(entry.file, err);
       }
@@ -99,31 +147,42 @@ export default function UploadZone({
       const list = Array.from(incoming);
       if (list.length === 0) return;
 
+      // Build entries outside the state updater so Strict Mode's double-invocation
+      // doesn't create duplicate AbortControllers and duplicate upload requests.
+      const seen = new Set(entriesRef.current.map((e) => e.key));
       const fresh: UploadEntry[] = [];
+      for (const f of list) {
+        const key = fileKey(f);
+        if (seen.has(key)) continue;
+        fresh.push({ key, file: f, status: "requesting", controller: new AbortController() });
+        seen.add(key);
+        if (!multiple) break;
+      }
+
+      if (fresh.length === 0) return;
+
       setEntries((prev) => {
-        const seen = new Set(prev.map((e) => e.key));
-        const base = multiple ? [...prev] : [];
-        for (const f of list) {
-          const key = fileKey(f);
-          if (seen.has(key)) continue;
-          const entry: UploadEntry = {
-            key,
-            file: f,
-            status: "uploading",
-            progress: 0,
-            controller: new AbortController(),
-          };
-          base.push(entry);
-          fresh.push(entry);
-          seen.add(key);
-          if (!multiple) break;
-        }
-        return base;
+        const prevKeys = new Set(prev.map((e) => e.key));
+        const toAdd = fresh.filter((e) => !prevKeys.has(e.key));
+        if (toAdd.length === 0) return prev;
+        return multiple ? [...prev, ...toAdd] : toAdd;
       });
 
-      for (const entry of fresh) void startUpload(entry);
+      void ensureSessionId()
+        .then((id) => {
+          for (const entry of fresh) void startUpload(entry, id);
+        })
+        .catch((err) => {
+          const message = axios.isAxiosError(err)
+            ? (err.response?.statusText ?? err.message)
+            : "Failed to create chat session";
+          for (const entry of fresh) {
+            updateEntry(entry.key, { status: "error", error: message });
+            onError?.(entry.file, err);
+          }
+        });
     },
-    [multiple, startUpload],
+    [ensureSessionId, multiple, onError, startUpload, updateEntry],
   );
 
   const openPicker = () => inputRef.current?.click();
@@ -178,7 +237,8 @@ export default function UploadZone({
     e.stopPropagation();
     setEntries((prev) => {
       const target = prev.find((x) => x.key === key);
-      if (target && target.status === "uploading") target.controller.abort();
+      if (target && (target.status === "requesting" || target.status === "ready"))
+        target.controller.abort();
       return prev.filter((x) => x.key !== key);
     });
   };
@@ -232,6 +292,7 @@ export default function UploadZone({
           type="file"
           accept={accept}
           multiple={multiple}
+          onClick={(e) => e.stopPropagation()}
           onChange={onChange}
           className="sr-only"
         />
@@ -254,9 +315,19 @@ export default function UploadZone({
                   type="button"
                   aria-label={`Remove ${e.file.name}`}
                   onClick={(ev) => removeEntry(ev, e.key)}
-                  className="border-line-bright text-fg-mute hover:bg-lime/10 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded border bg-transparent text-[12px] leading-none transition-colors hover:border-red-500 hover:text-red-500"
+                  disabled={e.status !== "uploaded"}
+                  className={cn(
+                    "border-line-bright text-fg-mute inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded border bg-transparent text-[12px] leading-none transition-colors",
+                    e.status === "uploaded"
+                      ? "hover:bg-lime/10 hover:border-red-500 hover:text-red-500"
+                      : "hover:cursor-auto",
+                  )}
                 >
-                  <Trash2 size={16} />
+                  {e.status === "uploaded" ? (
+                    <Trash2 size={16} />
+                  ) : (
+                    <Loader size={16} className="animate-spin" />
+                  )}
                 </button>
               </div>
               {/* <div className="mt-1.5 flex items-center gap-2">

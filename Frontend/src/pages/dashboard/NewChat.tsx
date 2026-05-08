@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UploadZone from "../../components/UploadZone";
+import { useUIStore } from "../../store/uiStore";
 
 type NewChatProps = {
   onStart?: (prompt: string) => void;
@@ -7,6 +8,11 @@ type NewChatProps = {
 
 export default function NewChat({ onStart }: NewChatProps) {
   const [attachedFilesList, setAttachedFilesList] = useState<string[]>([]);
+  const { setCurrentSessionId } = useUIStore();
+
+  useEffect(() => {
+    setCurrentSessionId(null);
+  }, []);
 
   return (
     <main className="bg-bg relative flex h-full min-w-0 flex-1 flex-col overflow-hidden">
@@ -60,7 +66,7 @@ export default function NewChat({ onStart }: NewChatProps) {
       </header>
 
       {/* Hero body — scrollable column with staggered slide-up reveals (delay cascades by ~50–80ms). */}
-      <section className="relative z-10 flex flex-1 items-center overflow-y-auto px-8 py-12">
+      <section className="relative z-10 flex flex-1 items-start overflow-y-auto px-8 py-12">
         <div className="mx-auto w-full max-w-[820px]">
           {/* Eyebrow — date stamp + "New conversation" label. */}
           <div className="text-fg-mute animate-slide-up tracking-mono mb-5 flex items-center gap-3 font-mono text-[10px] uppercase [animation-delay:50ms]">
