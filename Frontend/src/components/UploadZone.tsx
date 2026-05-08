@@ -11,18 +11,8 @@ import {
 } from "../constants/upload";
 import { chatService } from "../services/chatService";
 import { useUIStore } from "../store/uiStore";
+import type { UploadEntry } from "../types/upload";
 import { Trash2, Loader } from "lucide-react";
-
-type UploadStatus = "requesting" | "ready" | "uploaded" | "error" | "canceled";
-
-type UploadEntry = {
-  key: string;
-  file: File;
-  status: UploadStatus;
-  presignedUrl?: string;
-  error?: string;
-  controller: AbortController;
-};
 
 type UploadZoneProps = {
   accept?: string;
@@ -62,7 +52,11 @@ export default function UploadZone({
   const inputRef = useRef<HTMLInputElement>(null);
   const dragDepth = useRef(0);
   const [drag, setDrag] = useState(false);
-  const [entries, setEntries] = useState<UploadEntry[]>([]);
+  const entries = useUIStore((s) => s.uploadEntries);
+  const addUploadEntries = useUIStore((s) => s.addUploadEntries);
+  const patchUploadEntry = useUIStore((s) => s.patchUploadEntry);
+  const removeUploadEntry = useUIStore((s) => s.removeUploadEntry);
+  const clearUploadEntries = useUIStore((s) => s.clearUploadEntries);
   const entriesRef = useRef<UploadEntry[]>([]);
   const currentSessionId = useUIStore((s) => s.currentSessionId);
   const setCurrentSessionId = useUIStore((s) => s.setCurrentSessionId);
@@ -98,9 +92,12 @@ export default function UploadZone({
     };
   }, []);
 
-  const updateEntry = useCallback((key: string, patch: Partial<UploadEntry>) => {
-    setEntries((prev) => prev.map((e) => (e.key === key ? { ...e, ...patch } : e)));
-  }, []);
+  const updateEntry = useCallback(
+    (key: string, patch: Partial<UploadEntry>) => {
+      patchUploadEntry(key, patch);
+    },
+    [patchUploadEntry],
+  );
 
   const startUpload = useCallback(
     async (entry: UploadEntry, sessionId: string) => {
@@ -161,12 +158,8 @@ export default function UploadZone({
 
       if (fresh.length === 0) return;
 
-      setEntries((prev) => {
-        const prevKeys = new Set(prev.map((e) => e.key));
-        const toAdd = fresh.filter((e) => !prevKeys.has(e.key));
-        if (toAdd.length === 0) return prev;
-        return multiple ? [...prev, ...toAdd] : toAdd;
-      });
+      if (!multiple) clearUploadEntries();
+      addUploadEntries(fresh);
 
       void ensureSessionId()
         .then((id) => {
@@ -182,7 +175,15 @@ export default function UploadZone({
           }
         });
     },
-    [ensureSessionId, multiple, onError, startUpload, updateEntry],
+    [
+      addUploadEntries,
+      clearUploadEntries,
+      ensureSessionId,
+      multiple,
+      onError,
+      startUpload,
+      updateEntry,
+    ],
   );
 
   const openPicker = () => inputRef.current?.click();
@@ -235,12 +236,10 @@ export default function UploadZone({
 
   const removeEntry = (e: MouseEvent<HTMLButtonElement>, key: string) => {
     e.stopPropagation();
-    setEntries((prev) => {
-      const target = prev.find((x) => x.key === key);
-      if (target && (target.status === "requesting" || target.status === "ready"))
-        target.controller.abort();
-      return prev.filter((x) => x.key !== key);
-    });
+    const target = entriesRef.current.find((x) => x.key === key);
+    if (target && (target.status === "requesting" || target.status === "ready"))
+      target.controller.abort();
+    removeUploadEntry(key);
   };
 
   // Drop zone — dashed lime-on-dark surface; hover trails a soft lime radial under the cursor.
@@ -315,18 +314,18 @@ export default function UploadZone({
                   type="button"
                   aria-label={`Remove ${e.file.name}`}
                   onClick={(ev) => removeEntry(ev, e.key)}
-                  disabled={e.status !== "uploaded"}
+                  disabled={e.status === "requesting" || e.status === "ready"}
                   className={cn(
                     "border-line-bright text-fg-mute inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded border bg-transparent text-[12px] leading-none transition-colors",
-                    e.status === "uploaded"
+                    e.status !== "requesting" && e.status !== "ready"
                       ? "hover:bg-lime/10 hover:border-red-500 hover:text-red-500"
                       : "hover:cursor-auto",
                   )}
                 >
-                  {e.status === "uploaded" ? (
-                    <Trash2 size={16} />
-                  ) : (
+                  {e.status === "requesting" || e.status === "ready" ? (
                     <Loader size={16} className="animate-spin" />
+                  ) : (
+                    <Trash2 size={16} />
                   )}
                 </button>
               </div>

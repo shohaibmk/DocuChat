@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import UploadZone from "../../components/UploadZone";
 import { useUIStore } from "../../store/uiStore";
 
@@ -7,11 +7,16 @@ type NewChatProps = {
 };
 
 export default function NewChat({ onStart }: NewChatProps) {
-  const [attachedFilesList, setAttachedFilesList] = useState<string[]>([]);
-  const { setCurrentSessionId } = useUIStore();
+  const setCurrentSessionId = useUIStore((s) => s.setCurrentSessionId);
+  const uploadEntries = useUIStore((s) => s.uploadEntries);
+  const clearUploadEntries = useUIStore((s) => s.clearUploadEntries);
+
+  const allUploaded =
+    uploadEntries.length > 0 && uploadEntries.every((e) => e.status === "uploaded");
 
   useEffect(() => {
     setCurrentSessionId(null);
+    clearUploadEntries();
   }, []);
 
   return (
@@ -102,9 +107,7 @@ export default function NewChat({ onStart }: NewChatProps) {
               <span className="bg-line-bright ml-2 h-px flex-1" />
               <span className="text-fg-dim">drag · drop · pick</span>
             </div>
-            <UploadZone
-              onUploaded={(file) => setAttachedFilesList((prev) => [...prev, file.name])}
-            />
+            <UploadZone />
           </div>
 
           {/* Composer form — submits via onStart; Enter sends, Shift+Enter inserts newline.
@@ -119,7 +122,7 @@ export default function NewChat({ onStart }: NewChatProps) {
             }}
           >
             <fieldset
-              disabled={attachedFilesList.length === 0}
+              disabled={!allUploaded}
               className="contents disabled:[&_*]:cursor-not-allowed"
             >
               <div className="text-fg-mute tracking-mono mb-2 flex items-center gap-2 font-mono text-[9px] uppercase">
@@ -156,6 +159,7 @@ export default function NewChat({ onStart }: NewChatProps) {
                   </div>
                   <button
                     type="submit"
+                    disabled={!allUploaded}
                     className="bg-lime text-bg hover:bg-lime-bright disabled:bg-bg-card disabled:text-fg-mute shadow-glow-lg inline-flex items-center gap-2 rounded-md px-4 py-2 text-[13px] font-semibold transition-transform hover:-translate-y-px disabled:shadow-none disabled:hover:translate-y-0"
                   >
                     Begin
