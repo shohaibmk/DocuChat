@@ -121,10 +121,7 @@ export default function NewChat({ onStart }: NewChatProps) {
               if (prompt) onStart?.(prompt);
             }}
           >
-            <fieldset
-              disabled={!allUploaded}
-              className="contents disabled:[&_*]:cursor-not-allowed"
-            >
+            <fieldset className="contents disabled:**:cursor-not-allowed">
               <div className="text-fg-mute tracking-mono mb-2 flex items-center gap-2 font-mono text-[9px] uppercase">
                 <span className="bg-lime shadow-glow-sm h-1.5 w-1.5 rounded-full" />
                 Compose
@@ -137,7 +134,7 @@ export default function NewChat({ onStart }: NewChatProps) {
                   rows={3}
                   autoFocus
                   placeholder="Ask anything across your library…"
-                  className="text-fg placeholder:text-fg-dim block w-full resize-none bg-transparent text-[18px] leading-relaxed focus:outline-none"
+                  className="text-fg placeholder:text-fg-dim block w-full resize-none bg-transparent text-sm leading-relaxed focus:outline-none"
                 />
                 <div className="mt-3 flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -160,7 +157,7 @@ export default function NewChat({ onStart }: NewChatProps) {
                   <button
                     type="submit"
                     disabled={!allUploaded}
-                    className="bg-lime text-bg hover:bg-lime-bright disabled:bg-bg-card disabled:text-fg-mute shadow-glow-lg inline-flex items-center gap-2 rounded-md px-4 py-2 text-[13px] font-semibold transition-transform hover:-translate-y-px disabled:shadow-none disabled:hover:translate-y-0"
+                    className="bg-lime text-bg hover:bg-lime-bright disabled:bg-bg-card disabled:text-fg-mute shadow-glow-lg inline-flex items-center gap-2 rounded-md px-4 py-2 text-[13px] font-semibold transition-transform hover:-translate-y-px hover:cursor-pointer disabled:cursor-not-allowed disabled:shadow-none disabled:hover:translate-y-0"
                   >
                     Begin
                     <span className="font-mono text-[10px] tracking-[0.16em] opacity-70">⏎</span>
